@@ -7,55 +7,55 @@ using ТокенаГакст = Yoakke.SynKit.Lexer.IToken<ТипТокенаГа
 [Parser(typeof(ТипТокенаГакст))]
 internal partial class ПарсерГакст
 {
-    [Rule($"Basic : OpCode+")]
-    private static ПростойКод MakeOpCode(IReadOnlyList<ТокенаГакст> identifierParts)
+    [Rule($"ПростойКод : Операция+")]
+    private static ПростойКод СделатьПростойКод(IReadOnlyList<ТокенаГакст> команды)
     {
-        return new ПростойКод(string.Join("", identifierParts.Select(_ => _.Text)));
+        return new ПростойКод(string.Join("", команды.Select(_ => _.Text)));
     }
 
-    [Rule($"StoreMacro : '(' Block ')'")]
-    private static Макрос MakeStoreMacro(ТокенаГакст _, Выражение identifierParts, ТокенаГакст __)
+    [Rule($"СохранениеМакроса : '(' Блок ')'")]
+    private static Макрос СделатьСохранениеМакроса(ТокенаГакст _, Выражение тело, ТокенаГакст __)
     {
-        return new Макрос(identifierParts);
+        return new Макрос(тело);
     }
 
-    [Rule($"LoopExpression : '[' Block ']'")]
-    private static Цикл MakeLoopExpression(ТокенаГакст _, Выражение identifierParts, ТокенаГакст __)
+    [Rule($"ЗацикленноеВыражение : '[' Блок ']'")]
+    private static ЗацикленноеВыражение СделатьЗацикленноеВыражение(ТокенаГакст _, Выражение тело, ТокенаГакст __)
     {
-        return new Цикл(identifierParts);
+        return new ЗацикленноеВыражение(тело);
     }
 
-    [Rule($"ConditionalExpression : '{{' Block '|' Block '}}'")]
-    private static Условие MakeConditionalExpression(ТокенаГакст _, Выражение thenExpression, ТокенаГакст __, Выражение elseExpression, ТокенаГакст ___)
+    [Rule($"УсловноеВыражение : '{{' Блок '|' Блок '}}'")]
+    private static УсловноеВыражение СделатьУсловноеВыражение(ТокенаГакст _, Выражение истинноеВыражение, ТокенаГакст __, Выражение ложноеВыражение, ТокенаГакст ___)
     {
-        return new Условие(thenExpression, elseExpression);
+        return new УсловноеВыражение(истинноеВыражение, ложноеВыражение);
     }
 
-    [Rule($"Expression : StoreMacro")]
-    [Rule($"Expression : ConditionalExpression")]
-    [Rule($"Expression : LoopExpression")]
-    [Rule($"Expression : Basic")]
-    private static Выражение MakeExpression(Выражение expression)
+    [Rule($"Выражение : СохранениеМакроса")]
+    [Rule($"Выражение : УсловноеВыражение")]
+    [Rule($"Выражение : ЗацикленноеВыражение")]
+    [Rule($"Выражение : ПростойКод")]
+    private static Выражение СделатьВыражение(Выражение выражение)
     {
-        return expression;
+        return выражение;
     }
 
-    [Rule($"Block : Expression*")]
-    private static Блок MakeBlockExpression(IReadOnlyList<Выражение> identifierParts)
+    [Rule($"Блок : Выражение*")]
+    private static Блок СделатьБлок(IReadOnlyList<Выражение> выражения)
     {
-        return new Блок(identifierParts);
+        return new Блок(выражения);
     }
 
-    [Rule($"Program : Block '!'")]
-    private static Блок MakeProgram(Блок identifierParts, ТокенаГакст _)
+    [Rule($"Программа : Блок '!'")]
+    private static Блок СделатьПрограмму(Блок тело, ТокенаГакст _)
     {
-        return identifierParts;
+        return тело;
     }
 }
 
 abstract record Выражение;
-record ПростойКод(string код) : Выражение;
+record ПростойКод(string Код) : Выражение;
 record Блок(IReadOnlyList<Выражение> Выражения) : Выражение;
 record Макрос(Выражение Тело) : Выражение;
-record Условие(Выражение thenExpression, Выражение elseExpression) : Выражение;
-record Цикл(Выражение Тело) : Выражение;
+record УсловноеВыражение(Выражение ИстинноеВыражение, Выражение ЛожноеВыражение) : Выражение;
+record ЗацикленноеВыражение(Выражение Тело) : Выражение;

@@ -5,16 +5,16 @@ using Yoakke.SynKit.Lexer.Attributes;
 
 internal enum ТипТокенаГакст
 {
-    [Error] Error,
-    [End] End,
+    [Error] Ошибка,
+    [End] Конец,
     [Ignore][Regex(Regexes.Whitespace)] Whitespace,
     [Ignore][Regex("[а-яА-ЯёЁо]")] Комментарии,
 
-    [Regex("[A-Za-z0-9-+*/_<>=$?~:#@%]")] OpCode,
-    [Token("{")] BeginIf,
-    [Token("|")] Else,
-    [Token("}")] EndIf,
-    [Token("[")] BeginLoop,
-    [Token("]")] EndLoop,
-    [Token("!")] FinishProgram,
+    [Regex("[A-Za-z0-9-+*/_<>=$?~:#@%]")] Операция,
+    [Token("{")] НачалоУсловия,
+    [Token("|")] Иначе,
+    [Token("}")] КонецУсловия,
+    [Token("[")] НачалоЦикла,
+    [Token("]")] КонецЦикла,
+    [Token("!")] ЗавершениеПрограммы,
 }
