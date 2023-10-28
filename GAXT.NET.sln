@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GAXT.NET", "GAXT.NET\GAXT.N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GAXT.Runtime", "GAXT.Runtime\GAXT.Runtime.csproj", "{1D04013E-2912-44CB-90AB-6BA88AC26250}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GAXT.Tests", "GAXT.Tests\GAXT.Tests.csproj", "{DAFF9A32-BF78-47F7-A68A-B71F033D01A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1D04013E-2912-44CB-90AB-6BA88AC26250}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D04013E-2912-44CB-90AB-6BA88AC26250}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D04013E-2912-44CB-90AB-6BA88AC26250}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAFF9A32-BF78-47F7-A68A-B71F033D01A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAFF9A32-BF78-47F7-A68A-B71F033D01A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAFF9A32-BF78-47F7-A68A-B71F033D01A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAFF9A32-BF78-47F7-A68A-B71F033D01A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

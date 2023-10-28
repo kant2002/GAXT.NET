@@ -11,10 +11,21 @@ public static class СредаВыполнения
     static Stack<long> текущийСтек = стекЗначений;
     public static Stack<long> другойСтек = стекПеременных;
     static List<Action> списокМакросов = new List<Action>();
-    
+
     internal static void УстановитьУстройствоВывода(TextWriter новыйПисатель)
     {
         писатель = новыйПисатель;
+    }
+
+    internal static void СброситьОкружение()
+    {
+        стекЗначений.Clear();
+        стекПеременных.Clear();
+        текущийСтек = стекЗначений;
+        другойСтек = стекПеременных;
+        списокМакросов.Clear();
+        переменные = new long['z' - 'a' + 1];
+        писатель = Console.Out;
     }
 
     public static void ПоложитьВСтек(long значение)
@@ -22,9 +33,9 @@ public static class СредаВыполнения
         текущийСтек.Push(значение);
     }
 
-    public static void ПоложитьПеременную(long значение)
+    public static void ПоложитьПеременную(char переменная)
     {
-        стекПеременных.Push(значение);
+        стекПеременных.Push(переменная - 'a');
     }
 
     public static void ПереключитьТекущийСтек()
@@ -34,37 +45,43 @@ public static class СредаВыполнения
 
     public static void СохранитьПеременную(long значение)
     {
-        if (текущийСтек == стекПеременных)
+        if (текущийСтек == стекЗначений)
         {
-            другойСтек.Push(значение);
+            текущийСтек.Pop();
+            текущийСтек.Push(значение);
         }
         else
         {
-            var оп1 = другойСтек.Peek();
+            var оп1 = текущийСтек.Peek();
             переменные[оп1] = значение;
             Debug.WriteLine($"Set variable {(char)(оп1 + 'a')} to значение {значение}");
         }
     }
 
+    public static long ТранслироватьПеременную(long значение)
+    {
+        if (текущийСтек == стекПеременных)
+        {
+            return переменные[значение];
+        }
+
+        return значение;
+    }
+
+    internal static long ЗначениеПеременной(char значение)
+    {
+        return переменные[(char)значение - 'a'];
+    }
+
     public static long Посмотреть()
     {
         var з = текущийСтек.Peek();
-        if (текущийСтек == стекПеременных)
-        {            
-            return переменные.Length <= з ? з : переменные[з];
-        }
-
         return з;
     }
 
     public static long СнятьСоСтека()
     {
         var b = текущийСтек.Pop();
-        if (текущийСтек == стекПеременных)
-        {
-            return переменные[b];
-        }
-
         return b;
     }
 
@@ -91,5 +108,14 @@ public static class СредаВыполнения
     public static Action ПолучитьМакрос(long кодМакроса)
     {
         return списокМакросов[(int)кодМакроса];
+    }
+
+    internal static void DumpInterpreterState()
+    {
+        Console.WriteLine($"Текущий стек: {(текущийСтек == стекЗначений ? "значений" : "переменных")}");
+        Console.WriteLine($"Стек значений: {string.Join(",", стекЗначений)}");
+        var переменные = string.Join(",", стекПеременных.Select(_ => (char)(_ + 'a')));
+        var значенияПеременных = string.Join(",", стекПеременных.Select(_ => ЗначениеПеременной((char)(_ + 'a'))));
+        Console.WriteLine($"Стек переменных: {переменные} | {значенияПеременных}");
     }
 }

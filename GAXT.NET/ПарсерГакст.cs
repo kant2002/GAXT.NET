@@ -1,5 +1,6 @@
 ﻿namespace GAXT.NET;
 
+using System.Diagnostics;
 using Yoakke.SynKit.Parser.Attributes;
 
 using ТокенаГакст = Yoakke.SynKit.Lexer.IToken<ТипТокенаГакст>;
@@ -54,8 +55,23 @@ internal partial class ПарсерГакст
 }
 
 abstract record Выражение;
+[DebuggerDisplay("{Код}")]
 record ПростойКод(string Код) : Выражение;
-record Блок(IReadOnlyList<Выражение> Выражения) : Выражение;
+
+[DebuggerDisplay("{DebugOutput}")]
+record Блок(IReadOnlyList<Выражение> Выражения) : Выражение
+{
+    public string DebugOutput
+    {
+        get
+        {
+            return string.Join("\n", Выражения);
+        }
+    }
+}
+[DebuggerDisplay("Макрос = {Тело}")]
 record Макрос(Выражение Тело) : Выражение;
+[DebuggerDisplay("УсловноеВыражение = {ИстинноеВыражение} | {ЛожноеВыражение}")]
 record УсловноеВыражение(Выражение ИстинноеВыражение, Выражение ЛожноеВыражение) : Выражение;
+[DebuggerDisplay("ЗацикленноеВыражение = {Тело}")]
 record ЗацикленноеВыражение(Выражение Тело) : Выражение;

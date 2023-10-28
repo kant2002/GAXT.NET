@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="GAXT.Tests" />
+    <InternalsVisibleTo Include="GAXT.NET" />
+  </ItemGroup>
+
 </Project>
