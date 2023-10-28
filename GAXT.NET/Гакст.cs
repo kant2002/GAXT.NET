@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using GAXT.NET;
+using System.Diagnostics;
 using System.Text;
 
 var программа = $@"12>
@@ -17,7 +18,7 @@ var программа = $@"12>
         }}
     }}
 }}!
-".AsSpan();
+";
 var переменные = new long['z' - 'a' + 1];
 var стекЗначений = new Stack<long>();
 var стекПеременных = new Stack<long>();
@@ -28,7 +29,22 @@ var стекЦиклов = new Stack<long>();
 var списокМакросов = new List<string>();
 StringBuilder? текущийМакрос = null;
 
-ВыполнитьПрограмму(программа, Console.Out);
+var лексер = new ЛексерГакст(программа.ToString());
+var парсер = new ПарсерГакст(лексер);
+var результатРазбора = парсер.ParseProgram();
+if (результатРазбора.IsError)
+{
+    Console.WriteLine($"ошибка разбора программы. Получили {результатРазбора.Error.Got} на строке и столбце {результатРазбора.Error.Position}");
+    return;
+}
+
+if (!лексер.IsEnd)
+{
+    Console.WriteLine($"ошибка разбора программы. часть программы не разобрана");
+    return;
+}
+
+ВыполнитьПрограмму(программа.AsSpan(), Console.Out);
 
 void ВыполнитьПрограмму(ReadOnlySpan<char> програма, TextWriter писатель)
 {

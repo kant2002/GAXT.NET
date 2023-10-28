@@ -7,4 +7,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Yoakke.SynKit.Lexer" Version="2023.5.31-2.48.40-nightly" />
+    <PackageReference Include="Yoakke.SynKit.Parser" Version="2023.5.31-2.48.40-nightly" />
+    <PackageReference Include="Yoakke.SynKit.Lexer.Generator" Version="2023.5.31-2.48.40-nightly" />
+    <PackageReference Include="Yoakke.SynKit.Parser.Generator" Version="2023.5.31-2.48.40-nightly" />
+  </ItemGroup>
+
 </Project>
