@@ -21,19 +21,19 @@ internal partial class ПарсерГакст
         return new PlainProgram(string.Join("", identifierParts.Select(_ => _.Text)));
     }
 
-    [Rule($"StoreMacro : '(' Expression ')'")]
+    [Rule($"StoreMacro : '(' Block ')'")]
     private static StoreMacro MakeStoreMacro(ТокенаГакст _, Expression identifierParts, ТокенаГакст __)
     {
         return new StoreMacro(identifierParts);
     }
 
-    [Rule($"LoopExpression : '(' Expression ')'")]
+    [Rule($"LoopExpression : '(' Block ')'")]
     private static LoopExpression MakeLoopExpression(ТокенаГакст _, Expression identifierParts, ТокенаГакст __)
     {
         return new LoopExpression(identifierParts);
     }
 
-    [Rule($"ConditionalExpression : '{{' Expression '|' Expression '}}'")]
+    [Rule($"ConditionalExpression : '{{' Block '|' Block '}}'")]
     private static ConditionalExpression MakeConditionalExpression(ТокенаГакст _, Expression thenExpression, ТокенаГакст __, Expression elseExpression, ТокенаГакст ___)
     {
         return new ConditionalExpression(thenExpression, elseExpression);
@@ -48,10 +48,16 @@ internal partial class ПарсерГакст
         return expression;
     }
 
-    [Rule($"Program : Expression*")]
-    private static BlockExpression MakeProgram(IReadOnlyList<Expression> identifierParts)
+    [Rule($"Block : Expression*")]
+    private static BlockExpression MakeBlockExpression(IReadOnlyList<Expression> identifierParts)
     {
         return new BlockExpression(identifierParts);
+    }
+
+    [Rule($"Program : Block '!'")]
+    private static BlockExpression MakeProgram(BlockExpression identifierParts, ТокенаГакст _)
+    {
+        return identifierParts;
     }
 }
 
