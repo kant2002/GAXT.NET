@@ -2,7 +2,7 @@
 
 namespace GAXT.NET;
 
-internal static class СредаВыполнения
+public static class СредаВыполнения
 {
     static TextWriter писатель = Console.Out;
     static long[] переменные = new long['z' - 'a' + 1];
