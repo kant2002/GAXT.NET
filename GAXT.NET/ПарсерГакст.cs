@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace GAXT.NET;
 
-namespace GAXT.NET;
-
-using Yoakke.SynKit.Lexer;
-using Yoakke.SynKit.Parser;
 using Yoakke.SynKit.Parser.Attributes;
 
 using ТокенаГакст = Yoakke.SynKit.Lexer.IToken<ТипТокенаГакст>;
@@ -16,54 +8,54 @@ using ТокенаГакст = Yoakke.SynKit.Lexer.IToken<ТипТокенаГа
 internal partial class ПарсерГакст
 {
     [Rule($"Basic : OpCode+")]
-    private static PlainProgram MakeOpCode(IReadOnlyList<ТокенаГакст> identifierParts)
+    private static ПростойКод MakeOpCode(IReadOnlyList<ТокенаГакст> identifierParts)
     {
-        return new PlainProgram(string.Join("", identifierParts.Select(_ => _.Text)));
+        return new ПростойКод(string.Join("", identifierParts.Select(_ => _.Text)));
     }
 
     [Rule($"StoreMacro : '(' Block ')'")]
-    private static StoreMacro MakeStoreMacro(ТокенаГакст _, Expression identifierParts, ТокенаГакст __)
+    private static Макрос MakeStoreMacro(ТокенаГакст _, Выражение identifierParts, ТокенаГакст __)
     {
-        return new StoreMacro(identifierParts);
+        return new Макрос(identifierParts);
     }
 
-    [Rule($"LoopExpression : '(' Block ')'")]
-    private static LoopExpression MakeLoopExpression(ТокенаГакст _, Expression identifierParts, ТокенаГакст __)
+    [Rule($"LoopExpression : '[' Block ']'")]
+    private static Цикл MakeLoopExpression(ТокенаГакст _, Выражение identifierParts, ТокенаГакст __)
     {
-        return new LoopExpression(identifierParts);
+        return new Цикл(identifierParts);
     }
 
     [Rule($"ConditionalExpression : '{{' Block '|' Block '}}'")]
-    private static ConditionalExpression MakeConditionalExpression(ТокенаГакст _, Expression thenExpression, ТокенаГакст __, Expression elseExpression, ТокенаГакст ___)
+    private static Условие MakeConditionalExpression(ТокенаГакст _, Выражение thenExpression, ТокенаГакст __, Выражение elseExpression, ТокенаГакст ___)
     {
-        return new ConditionalExpression(thenExpression, elseExpression);
+        return new Условие(thenExpression, elseExpression);
     }
 
     [Rule($"Expression : StoreMacro")]
     [Rule($"Expression : ConditionalExpression")]
     [Rule($"Expression : LoopExpression")]
     [Rule($"Expression : Basic")]
-    private static Expression MakeExpression(Expression expression)
+    private static Выражение MakeExpression(Выражение expression)
     {
         return expression;
     }
 
     [Rule($"Block : Expression*")]
-    private static BlockExpression MakeBlockExpression(IReadOnlyList<Expression> identifierParts)
+    private static Блок MakeBlockExpression(IReadOnlyList<Выражение> identifierParts)
     {
-        return new BlockExpression(identifierParts);
+        return new Блок(identifierParts);
     }
 
     [Rule($"Program : Block '!'")]
-    private static BlockExpression MakeProgram(BlockExpression identifierParts, ТокенаГакст _)
+    private static Блок MakeProgram(Блок identifierParts, ТокенаГакст _)
     {
         return identifierParts;
     }
 }
 
-abstract record Expression;
-record PlainProgram(string code) : Expression;
-record BlockExpression(IReadOnlyList<Expression> code) : Expression;
-record StoreMacro(Expression code) : Expression;
-record ConditionalExpression(Expression thenExpression, Expression elseExpression) : Expression;
-record LoopExpression(Expression code) : Expression;
+abstract record Выражение;
+record ПростойКод(string код) : Выражение;
+record Блок(IReadOnlyList<Выражение> Выражения) : Выражение;
+record Макрос(Выражение Тело) : Выражение;
+record Условие(Выражение thenExpression, Выражение elseExpression) : Выражение;
+record Цикл(Выражение Тело) : Выражение;

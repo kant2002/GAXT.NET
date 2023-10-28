@@ -10,9 +10,11 @@ internal enum ТипТокенаГакст
     [Ignore][Regex(Regexes.Whitespace)] Whitespace,
     [Ignore][Regex("[а-яА-ЯёЁо]")] Комментарии,
 
-    [Regex("[A-Za-z0-9-+*/_<>=$?~:#@]")] OpCode,
+    [Regex("[A-Za-z0-9-+*/_<>=$?~:#@%]")] OpCode,
     [Token("{")] BeginIf,
     [Token("|")] Else,
     [Token("}")] EndIf,
+    [Token("[")] BeginLoop,
+    [Token("]")] EndLoop,
     [Token("!")] FinishProgram,
 }

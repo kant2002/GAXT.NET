@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 
 namespace GAXT.NET;
 
@@ -13,7 +12,6 @@ internal static class СредаВыполнения
     public static Stack<long> другойСтек = стекПеременных;
     static List<Action> списокМакросов = new List<Action>();
     
-
     internal static void УстановитьУстройствоВывода(TextWriter новыйПисатель)
     {
         писатель = новыйПисатель;
@@ -52,14 +50,14 @@ internal static class СредаВыполнения
     {
         var з = текущийСтек.Peek();
         if (текущийСтек == стекПеременных)
-        {
-            return переменные[з];
+        {            
+            return переменные.Length <= з ? з : переменные[з];
         }
 
         return з;
     }
 
-    public static long Снять()
+    public static long СнятьСоСтека()
     {
         var b = текущийСтек.Pop();
         if (текущийСтек == стекПеременных)
@@ -68,6 +66,11 @@ internal static class СредаВыполнения
         }
 
         return b;
+    }
+
+    public static void ОчиститьСтек()
+    {
+        текущийСтек.Clear();
     }
 
     public static void ВывестиСимвол(long значение)
