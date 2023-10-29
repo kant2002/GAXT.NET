@@ -61,4 +61,12 @@ public class ТестыИнтерпретатора
         Assert.Equal("1", писатель.ToString());
         Assert.Equal(1, ЗначениеПеременной('i'));
     }
+
+    [Fact]
+    public void Склеивание()
+    {
+        Выполнить("72_$~!");
+
+        Assert.Equal("H", писатель.ToString());
+    }
 }

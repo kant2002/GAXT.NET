@@ -40,7 +40,9 @@ public static class СредаВыполнения
 
     public static void ПереключитьТекущийСтек()
     {
-        (текущийСтек, другойСтек) = (другойСтек, текущийСтек);
+        var врм = текущийСтек;
+        текущийСтек = другойСтек;
+        другойСтек = врм;
     }
 
     public static void СохранитьПеременную(long значение)
@@ -65,6 +67,14 @@ public static class СредаВыполнения
             return переменные[значение];
         }
 
+        return значение;
+    }
+
+    public static long СклеитьЗначения(long топ1, long топ2)
+    {
+        var sign1 = Math.Abs(топ1) == топ1 ? 1 : -1;
+        var sign2 = Math.Abs(топ2) == топ2 ? 1 : -1;
+        var значение = sign1 * sign2 * long.Parse(Math.Abs(топ1).ToString() + Math.Abs(топ2).ToString());
         return значение;
     }
 
