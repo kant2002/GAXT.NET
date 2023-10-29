@@ -166,4 +166,18 @@ b#[#A@#]#
 ";
 
 var программа = программаСЦиклами;
+if (args.Length > 0)
+{
+    var имяФайла = args[0];
+    if (File.Exists(имяФайла))
+    {
+        программа = File.ReadAllText(имяФайла);
+    }
+    else
+    {
+        Console.WriteLine($"Файл {имяФайла} не существует");
+        return;
+    }
+}
+
 Выполнить(программа.ToString());
