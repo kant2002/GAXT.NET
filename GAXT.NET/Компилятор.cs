@@ -1,7 +1,5 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Collections.Generic;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace GAXT.NET;
 
@@ -9,9 +7,12 @@ internal class Компилятор
 {
     AssemblyDefinition сборка;
     AssemblyDefinition рантаймСборка;
-    Collection<Instruction> инструции;
     MethodDefinition точкаВхода;
+    TypeDefinition глобальныйТип;
+    MethodReference systemAction;
+    MethodReference invoke;
     private readonly string имя;
+    int счетчикМакросов;
 
     public static void Скомпилировать(string имя, string программа)
     {
@@ -26,16 +27,24 @@ internal class Компилятор
         сборка = AssemblyDefinition.CreateAssembly(имяСборки, "Primary", ModuleKind.Console);
         рантаймСборка = AssemblyDefinition.ReadAssembly("GAXT.Runtime.dll");
         var модуль = сборка.MainModule;
-        var глобальныйТип = модуль.GetType("<Module>");
+        глобальныйТип = модуль.GetType("<Module>");
         точкаВхода = new MethodDefinition(
             "Вход",
             MethodAttributes.Public | MethodAttributes.Static,
             модуль.TypeSystem.Int32);
         глобальныйТип.Methods.Add(точкаВхода);
         сборка.EntryPoint = точкаВхода;
+        var actionType = new TypeReference("System", "Action", сборка.MainModule, модуль.TypeSystem.CoreLibrary);
+        var actionCtor = new MethodReference(".ctor", модуль.TypeSystem.Void, actionType);
+        actionCtor.HasThis = true;
+        actionCtor.Parameters.Add(new ParameterDefinition(модуль.TypeSystem.Object));
+        actionCtor.Parameters.Add(new ParameterDefinition(модуль.TypeSystem.IntPtr));
+        systemAction = сборка.MainModule.ImportReference(actionCtor);
+        var actionInvoke = new MethodReference("Invoke", модуль.TypeSystem.Void, actionType);
+        actionInvoke.HasThis = true;
+        invoke = сборка.MainModule.ImportReference(actionInvoke);
         точкаВхода.Body.Variables.Add(new VariableDefinition(модуль.TypeSystem.Int64));
         точкаВхода.Body.Variables.Add(new VariableDefinition(модуль.TypeSystem.Int64));
-        инструции = точкаВхода.Body.Instructions;
     }
 
     public void Скомпилировать(string программа)
@@ -49,32 +58,33 @@ internal class Компилятор
             return;
         }
 
-        СкомпилироватьБлок(результатРазбора.Ok.Value);
-        инструции.Add(Instruction.Create(OpCodes.Ldc_I4_0));
-        инструции.Add(Instruction.Create(OpCodes.Ret));
+        СкомпилироватьБлок(точкаВхода, результатРазбора.Ok.Value);
+        точкаВхода.Body.Instructions.Add(Instruction.Create(OpCodes.Ldc_I4_0));
+        точкаВхода.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
         сборка.Write(имя + ".exe");
     }
 
-    void СкомпилироватьБлок(Блок блокКода)
+    void СкомпилироватьБлок(MethodDefinition метод, Блок блокКода)
     {
         foreach (var выражение in блокКода.Выражения)
         {
-            СкомпилироватьВыражение(выражение);
+            СкомпилироватьВыражение(метод, выражение);
         }
     }
 
-    void СкомпилироватьВыражение(Выражение выражение)
+    void СкомпилироватьВыражение(MethodDefinition метод, Выражение выражение)
     {
+        var инструции = метод.Body.Instructions;
         switch (выражение)
         {
             case ПростойКод блокКода:
                 foreach (char команда in блокКода.Код)
                 {
-                    СкомпилироватьКоманду(команда);
+                    СкомпилироватьКоманду(метод, команда);
                 }
                 break;
             case Блок блокКода:
-                СкомпилироватьБлок(блокКода);
+                СкомпилироватьБлок(метод, блокКода);
                 break;
             case УсловноеВыражение условие:
                 {
@@ -83,23 +93,41 @@ internal class Компилятор
                     var обработчикМетода = точкаВхода.Body.GetILProcessor();
                     var меткаЛожнойВетки = обработчикМетода.Create(OpCodes.Nop);
                     обработчикМетода.Emit(OpCodes.Brfalse, меткаЛожнойВетки);
-                    СкомпилироватьВыражение(условие.ИстинноеВыражение);
+                    СкомпилироватьВыражение(метод, условие.ИстинноеВыражение);
                     var меткаОкончания = обработчикМетода.Create(OpCodes.Nop);
                     обработчикМетода.Emit(OpCodes.Br, меткаОкончания);
                     обработчикМетода.Append(меткаЛожнойВетки);
-                    СкомпилироватьВыражение(условие.ЛожноеВыражение);
+                    СкомпилироватьВыражение(метод, условие.ЛожноеВыражение);
                     обработчикМетода.Append(меткаОкончания);
                 }
                 break;
-            //case Макрос блокКода:
-            //    ЗарегистрироватьМакрос(() => ВыполнитьВыражение(блокКода.Тело));
-            //    break;
+            case Макрос блокКода:
+                {
+                    var макроМетод = new MethodDefinition(
+                        "Макрос_" + счетчикМакросов,
+                        MethodAttributes.Public | MethodAttributes.Static,
+                        сборка.MainModule.TypeSystem.Void);
+                    глобальныйТип.Methods.Add(макроМетод);
+                    макроМетод.Body.Variables.Add(new VariableDefinition(сборка.MainModule.TypeSystem.Int64));
+                    макроМетод.Body.Variables.Add(new VariableDefinition(сборка.MainModule.TypeSystem.Int64));
+                    СкомпилироватьВыражение(макроМетод, блокКода.Тело);
+                    макроМетод.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+                    счетчикМакросов++;
+
+                    инструции.Add(Instruction.Create(OpCodes.Ldnull));
+                    инструции.Add(Instruction.Create(OpCodes.Ldftn, макроМетод));
+                    инструции.Add(Instruction.Create(OpCodes.Newobj, systemAction));
+                    //ЗарегистрироватьМакрос(() => СкомпилироватьВыражение(макроМетод, блокКода.Тело));
+                    var ЗарегистрироватьМакрос = GetRuntimeHelperMethod("ЗарегистрироватьМакрос");
+                    инструции.Add(Instruction.Create(OpCodes.Call, ЗарегистрироватьМакрос));
+                }
+                break;
             case ЗацикленноеВыражение блокКода:
                 {
                     var обработчикМетода = точкаВхода.Body.GetILProcessor();
                     var началоЦикла = обработчикМетода.Create(OpCodes.Nop);
                     обработчикМетода.Append(началоЦикла);
-                    СкомпилироватьВыражение(блокКода.Тело);
+                    СкомпилироватьВыражение(метод, блокКода.Тело);
 
                     var Посмотреть = GetRuntimeHelperMethod("Посмотреть");
                     инструции.Add(Instruction.Create(OpCodes.Call, Посмотреть));
@@ -138,8 +166,9 @@ internal class Компилятор
                ?? throw new InvalidOperationException($"Cannot find method {methodName} on type {typeDefinition.FullName}");
     }
 
-    void СкомпилироватьКоманду(char команда)
+    void СкомпилироватьКоманду(MethodDefinition метод, char команда)
     {
+        var инструции = метод.Body.Instructions;
         if (команда is >= 'A' and <= 'Z')
         {
             инструции.Add(Instruction.Create(OpCodes.Ldc_I8, ПолучитьКонстантноеЗначение(команда)));
@@ -277,12 +306,14 @@ internal class Компилятор
             var ПереключитьТекущийСтек = GetRuntimeHelperMethod("ПереключитьТекущийСтек");
             инструции.Add(Instruction.Create(OpCodes.Call, ПереключитьТекущийСтек));
         }
-        //else if (команда == '@')
-        //{
-        //    var кодМакроса = СнятьСоСтека();
-        //    var макрос = ПолучитьМакрос(кодМакроса);
-        //    макрос();
-        //}
+        else if (команда == '@')
+        {
+            var СнятьСоСтека = GetRuntimeHelperMethod("СнятьСоСтека");
+            инструции.Add(Instruction.Create(OpCodes.Call, СнятьСоСтека));
+            var ПолучитьМакрос = GetRuntimeHelperMethod("ПолучитьМакрос");
+            инструции.Add(Instruction.Create(OpCodes.Call, ПолучитьМакрос));
+            инструции.Add(Instruction.Create(OpCodes.Callvirt, invoke));
+        }
         else if (char.IsWhiteSpace(команда))
         {
             // ничего не делаем.
