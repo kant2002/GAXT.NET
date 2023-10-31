@@ -69,4 +69,12 @@ public class ТестыИнтерпретатора
 
         Assert.Equal("H", писатель.ToString());
     }
+
+    [Fact]
+    public void Прерывание_цикл()
+    {
+        Выполнить("7[2\\111]_$~!");
+
+        Assert.Equal("H", писатель.ToString());
+    }
 }
