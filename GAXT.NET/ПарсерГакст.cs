@@ -8,7 +8,14 @@ using ТокенаГакст = Yoakke.SynKit.Lexer.IToken<ТипТокенаГа
 [Parser(typeof(ТипТокенаГакст))]
 internal partial class ПарсерГакст
 {
-    [Rule($"ПростойКод : Операция+")]
+    [Rule($"ПростаяОперация : Операция")]
+    [Rule($"ПростаяОперация : Прервать")]
+    private static ТокенаГакст СделатьОперацию(ТокенаГакст команды)
+    {
+        return команды;
+    }
+
+    [Rule($"ПростойКод : ПростаяОперация+")]
     private static ПростойКод СделатьПростойКод(IReadOnlyList<ТокенаГакст> команды)
     {
         return new ПростойКод(string.Join("", команды.Select(_ => _.Text)));
