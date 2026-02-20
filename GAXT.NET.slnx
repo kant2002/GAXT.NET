@@ -3,4 +3,5 @@
   <Project Path="GAXT.NET/GAXT.NET.csproj" />
   <Project Path="GAXT.Runtime/GAXT.Runtime.csproj" />
   <Project Path="GAXT.Tests/GAXT.Tests.csproj" />
+  <Project Path="GAXT.Web/GAXT.Web.csproj" Id="220b395e-d1d6-4e18-ad12-5df5e64188f8" />
 </Solution>
