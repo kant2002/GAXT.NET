@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -12,7 +12,7 @@
     <PackageReference Include="Yoakke.SynKit.Parser" Version="2023.5.31-2.48.40-nightly" />
     <PackageReference Include="Yoakke.SynKit.Lexer.Generator" Version="2023.5.31-2.48.40-nightly" />
     <PackageReference Include="Yoakke.SynKit.Parser.Generator" Version="2023.5.31-2.48.40-nightly" />
-    <PackageReference Include="Mono.Cecil" Version="0.11.4" />
+    <PackageReference Include="Mono.Cecil" Version="0.11.6" />
   </ItemGroup>
 
   <ItemGroup>
