@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GAXT.NET\GAXT.NET.csproj" />
+    <ProjectReference Include="..\GAXT.NET.Compiler\GAXT.NET.Compiler.csproj" />
   </ItemGroup>
 
 </Project>

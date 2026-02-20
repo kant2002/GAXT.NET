@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="GAXT.NET.Compiler/GAXT.NET.Compiler.csproj" Id="61e0478b-89f7-45e2-aa0c-792e1f17e1a1" />
   <Project Path="GAXT.NET/GAXT.NET.csproj" />
   <Project Path="GAXT.Runtime/GAXT.Runtime.csproj" />
   <Project Path="GAXT.Tests/GAXT.Tests.csproj" />

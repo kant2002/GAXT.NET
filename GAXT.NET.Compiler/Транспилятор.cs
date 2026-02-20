@@ -1,23 +1,21 @@
-﻿using Mono.Cecil;
-using Mono.Cecil.Cil;
+﻿namespace GAXT.NET;
 
-namespace GAXT.NET;
-
-internal class Транспилятор
+public class Транспилятор
 {
     private readonly string имя;
     int счетчикМакросов;
-    private TextWriter писатель = Console.Out;
+    private TextWriter писатель;
 
     public static void Транспилировать(string имя, string программа)
     {
-        var к = new Транспилятор(имя);
+        var к = new Транспилятор(имя, Console.Out);
         к.Транспилировать(программа);
     }
 
-    public Транспилятор(string имя)
+    public Транспилятор(string имя, TextWriter писатель)
     {
         this.имя = имя;
+        this.писатель = писатель;
     }
 
     public void Транспилировать(string программа)

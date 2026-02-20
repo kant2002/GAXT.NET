@@ -1,7 +1,7 @@
 ﻿namespace GAXT.NET;
 using static GAXT.NET.СредаВыполнения;
 
-internal static class Интерпретатор
+public static class Интерпретатор
 {
     public static void Выполнить(string программа)
     {

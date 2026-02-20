@@ -3,7 +3,7 @@ using Mono.Cecil.Cil;
 
 namespace GAXT.NET;
 
-internal class Компилятор
+public class Компилятор
 {
     AssemblyDefinition сборка;
     AssemblyDefinition рантаймСборка;
