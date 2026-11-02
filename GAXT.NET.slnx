@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Éléments de solution/">
+    <File Path=".github/workflows/deployment.yml" />
+    <File Path="License.txt" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="GAXT.NET.Tests/GAXT.NET.Tests.fsproj" Id="bb83620d-d03c-408c-9b9d-e5c38dcf0aa2" />
+  <Project Path="GAXT.NET/GAXT.NET.fsproj" />
+</Solution>
