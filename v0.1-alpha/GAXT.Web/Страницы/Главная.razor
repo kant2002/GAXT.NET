@@ -1,0 +1,29 @@
+﻿@page "/"
+
+<PageTitle>Главная</PageTitle>
+
+<h1>Привет, GAXT!</h1>
+
+<div class="row">
+    <div class="col">
+        <InputTextArea @bind-Value="ИсходныйКод" class="form-control" />
+    </div>
+    <div class="col">
+        <pre>@ТранспилированныйКод</pre>
+    </div>
+</div>
+@code {
+    public string ТранспилированныйКод { get; set; } = "";
+    public string ИсходныйКод 
+    { 
+        get; 
+        set
+        {
+            field = value;
+            var писатель = new StringWriter();
+            var транспилятор = new Транспилятор("", писатель);
+            транспилятор.Транспилировать(ИсходныйКод);
+            ТранспилированныйКод = писатель.ToString();
+        }
+    } = "";
+}

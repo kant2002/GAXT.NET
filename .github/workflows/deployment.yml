@@ -33,12 +33,16 @@ jobs:
         run: dotnet workload install wasm-tools
       - name: Restore dependencies
         run: dotnet restore
+        working-directory: v0.1-alpha
       - name: Build
         run: dotnet build -c Release --no-restore
+        working-directory: v0.1-alpha
       - name: Test
         run: dotnet test -c Release --no-build --verbosity normal
+        working-directory: v0.1-alpha
       - name: Publish
-        run: dotnet publish GAXT.Web/GAXT.Web.csproj -c Release -o release --verbosity normal
+        run: dotnet publish GAXT.Web/GAXT.Web.csproj -c Release -o ../release --verbosity normal
+        working-directory: v0.1-alpha
       - name: Change base-tag in index.html from / to GAXT.NET
         run: sed -i 's/<base href="\/" \/>/<base href="\/GAXT.NET\/" \/>/g' release/wwwroot/index.html
       - name: Add .nojekyll file
