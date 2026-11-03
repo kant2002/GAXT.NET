@@ -14,4 +14,14 @@
     <PackageReference Include="Russian.System.Runtime" Version="0.0.2" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <LangVersion>10</LangVersion>
+    <DotnetFsiCompilerPath>$(PkgAndriiKurdiumov_FSharp_Compiler_Russian)/lib/net10.0/fsi.dll</DotnetFsiCompilerPath>
+    <DotnetFscCompilerPath>$(PkgAndriiKurdiumov_FSharp_Compiler_Russian)/lib/net10.0/fsc.dll</DotnetFscCompilerPath>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="AndriiKurdiumov.FSharp.Compiler.Russian" Version="14.0.110-servicing.26553.1" IncludeAssets="all" />
+  </ItemGroup>
+
 </Project>
