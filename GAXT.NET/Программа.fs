@@ -3,20 +3,24 @@
     open System.IO
 
     type Токен =
-        | СтроковыйЛитерал of string
+        | СтроковыйЛитерал of строка
         | ВстроеннаяФункция of char
         | Команда of char
         | Цифра of char
         | Символ of char
+
+    type Кадр =
+        | Цикл of цел
+        | Условие of цел * bool
 
     type Интерпретатор =
         {
             консоль: System.IO.TextWriter
             mutable активныйСтек: цел
             mutable текущееЗначение: цел option
-            стекВычислений: System.Collections.Generic.Stack<int>
-            стекИменПеременных: System.Collections.Generic.Stack<int>
-            стекЦиклов: System.Collections.Generic.Stack<int>
+            стекВычислений: System.Collections.Generic.Stack<цел>
+            стекИменПеременных: System.Collections.Generic.Stack<цел>
+            стекКадров: System.Collections.Generic.Stack<Кадр>
             mutable переменные: цел array
         }
 
@@ -25,13 +29,13 @@
             консоль = консоль
             активныйСтек = 0
             текущееЗначение = None
-            стекВычислений = System.Collections.Generic.Stack<int>()
-            стекИменПеременных = System.Collections.Generic.Stack<int>()
-            стекЦиклов = System.Collections.Generic.Stack<int>()
+            стекВычислений = System.Collections.Generic.Stack<цел>()
+            стекИменПеременных = System.Collections.Generic.Stack<цел>()
+            стекКадров = System.Collections.Generic.Stack<Кадр>()
             переменные = Array.create 26 0
         }
 
-    let положитьНаСтек (интерпретатор: Интерпретатор) (значение: int) =
+    let положитьНаСтек (интерпретатор: Интерпретатор) (значение: цел) =
         if интерпретатор.активныйСтек = 0 then
             интерпретатор.стекВычислений.Push(значение)
         else
@@ -178,6 +182,22 @@
                                 (a * 10 + b)
                         интерпретатор.стекВычислений.Push результат
                         None
+                    // 5.3 Логика
+                    | '<' ->
+                        let b = забратьСоСтека интерпретатор
+                        let a = забратьСоСтека интерпретатор
+                        интерпретатор.стекВычислений.Push (if a < b then 1 else 0)
+                        None
+                    | '=' ->
+                        let b = забратьСоСтека интерпретатор
+                        let a = забратьСоСтека интерпретатор
+                        интерпретатор.стекВычислений.Push (if a = b then 1 else 0)
+                        None
+                    | '>' ->
+                        let b = забратьСоСтека интерпретатор
+                        let a = забратьСоСтека интерпретатор
+                        интерпретатор.стекВычислений.Push (if a > b then 1 else 0)
+                        None
                     // 5.4 Печать
                     | '?' -> 
                         let текущееЗначение = посмотретьНаСтек интерпретатор |> Option.defaultValue 0
@@ -218,22 +238,78 @@
                         интерпретатор.активныйСтек <- 1 - интерпретатор.активныйСтек
                         None         
                     // 5.6 Поток управления
+                    | '{' -> 
+                        let текущееЗначение = посмотретьНаСтек интерпретатор |> Option.defaultValue 0
+                        if текущееЗначение = 0 then
+                            let mutable счетчик = 0
+                            let mutable новыйИндекс = (0, false)
+                            for i = индексТокена + 1 to токены.Length do
+                                if (not (snd новыйИндекс)) then
+                                    let токен = токены[i]
+                                    if токен = Команда('}') then
+                                        if счетчик = 0 then
+                                            новыйИндекс <- (i + 1, true)
+                                        else
+                                            счетчик <- счетчик - 1
+                                    elif токен = Команда('|') then
+                                        if счетчик = 0 then
+                                            новыйИндекс <- (i + 1, true)
+                                            интерпретатор.стекКадров.Push (Условие (индексТокена + 1, false))
+                                    elif токен = Команда('{') then
+                                        счетчик <- счетчик + 1
+                                    else
+                                        ()
+                            if snd новыйИндекс then
+                                Some (fst новыйИндекс)
+                            else
+                                None
+                        else
+                            интерпретатор.стекКадров.Push (Условие (индексТокена + 1, true))
+                            None
+                    | '|' -> 
+                        let mutable счетчик = 0
+                        let mutable новыйИндекс = (0, false)
+                        for i = индексТокена + 1 to токены.Length do
+                            if (not (snd новыйИндекс)) then
+                                let токен = токены[i]
+                                if токен = Команда('}') then
+                                    if счетчик = 0 then
+                                        новыйИндекс <- (i + 1, true)
+                                    else
+                                        счетчик <- счетчик - 1
+                                elif токен = Команда('|') then
+                                    if счетчик = 0 then
+                                        raise (System.InvalidOperationException("Неправильное использование '|' без соответствующего '{'"))
+                                elif токен = Команда('{') then
+                                    счетчик <- счетчик + 1
+                                else
+                                    ()
+                        if snd новыйИндекс then
+                            Some (fst новыйИндекс)
+                        else
+                            None
+                    | '}' -> 
+                        интерпретатор.стекКадров.Pop() |> игноровать
+                        None
                     | '!' -> 
                         Some System.Int32.MaxValue
                     // 5.8 Циклы
                     | '[' -> 
                         //интерпретатор.стекЦиклов.Push(int программа.BaseStream.Position)
-                        интерпретатор.стекЦиклов.Push (индексТокена + 1)
+                        интерпретатор.стекКадров.Push (Цикл (индексТокена + 1))
                         None
                     | ']' -> 
                         let текущееЗначение = посмотретьНаСтек интерпретатор |> Option.defaultValue 0
                         if текущееЗначение = 0 then
-                            интерпретатор.стекЦиклов.Pop() |> игноровать
+                            интерпретатор.стекКадров.Pop() |> игноровать
                             None
                         else
-                            let позиция = интерпретатор.стекЦиклов.Peek()
+                            let позиция = интерпретатор.стекКадров.Peek()
+                            match позиция with
+                            | Цикл позиция -> 
+                                //интерпретатор.стекЦиклов.Pop() |> игноровать
                             //программа.BaseStream.Seek(int64 позиция, SeekOrigin.Begin) |> игноровать
-                            Some позиция
+                                Some позиция
                     | _ ->
                         интерпретатор.консоль.WriteLine("Команда: " + символ.ToString())
                         None
